@@ -1,6 +1,8 @@
 var vows = require('vows'),
     expect = require('expect.js'),
-    cqlbinary = require('../../lib/cqlbinary/index');
+    cqlbinary = require('../../lib/cqlbinary/index'),
+    CONSISTENCY = cqlbinary.CONSISTENCY,
+    Result = cqlbinary.Result;
 
 vows.describe('cqlbinary').addBatch({
   'Connection': {
@@ -19,7 +21,7 @@ vows.describe('cqlbinary').addBatch({
       topic: function (connection) {
         connection.execute(
           "CREATE KEYSPACE binarytest WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}",
-          cqlbinary.CONSISTENCY.ONE,
+          CONSISTENCY.ONE,
           this.callback
         );
       },
@@ -29,9 +31,25 @@ vows.describe('cqlbinary').addBatch({
         expect(response).to.be.ok();
       },
 
+      'it should yield result of type SCHEMA_CHANGE': function (error, result) {
+        expect(result.type).to.be(Result.SCHEMA_CHANGE);
+      },
+
+      'it should put change in result': function (error, result) {
+        expect(result.change).to.be('CREATED');
+      },
+
+      'it should put keyspace in result': function (error, result) {
+        expect(result.keyspace).to.be('binarytest');
+      },
+
+      'it should not set table': function (error, result) {
+        expect(result.table).not.to.be.ok();
+      },
+
       'teardown': function () {
         connection = arguments[arguments.length - 1];
-        connection.execute("DROP KEYSPACE binarytest", cqlbinary.CONSISTENCY.ONE);
+        connection.execute("DROP KEYSPACE binarytest", CONSISTENCY.ONE);
       }
     },
 
