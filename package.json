@@ -1,0 +1,23 @@
+{
+  "name": "cqlbinary",
+  "version": "0.0.1",
+  "description": "A pure-Javascript driver for the CQL binary protocol",
+  "keywords": ["cassandra", "cql", "cql3", "driver", "binary"],
+  "homepage": "https://github.com/desmondmonster/node-cql-binary",
+  "author": {
+    "name": "Desmond Bowe",
+    "email": "desmondbowe@gmail.com",
+    "url": "https://github.com/desmondmonster"
+  },
+  "main": "./lib/cqlbinary/index",
+  "directories": {"lib": "./lib/cqlbinary"},
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/desmondmonster/node-cql-binary.git"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "vows": "~0.7"
+  }
+}
