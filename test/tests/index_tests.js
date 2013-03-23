@@ -89,7 +89,43 @@ vows.describe('cqlbinary').addBatch({
 
           'it should put table name in result': function (error, result) {
             expect(result.table).to.be('funny_table');
-          }
+          },
+
+          'with row added': {
+            topic: function (_, _, _, connection) {
+              connection.execute(
+                "INSERT INTO funny_table (id, name) VALUES (1, 'foo')",
+                CONSISTENCY.ONE,
+                this.callback
+              );
+            },
+
+            'it should complete successfully': assertSuccess,
+
+            'it should return result of type VOID': function (error, result) {
+              expect(result.type).to.be(Result.VOID);
+            },
+
+            'reading a row': {
+              topic: function (_, _, _, _, connection) {
+                connection.execute(
+                  "SELECT * FROM funny_table WHERE id = 1 LIMIT 1",
+                  CONSISTENCY.ONE,
+                  this.callback
+                );
+              },
+
+              'it should complete successfully': assertSuccess,
+
+              'it should return result of type rows': function (error, result) {
+                expect(result.type).to.be(Result.ROWS);
+              },
+
+              'it should return the row': function (error, result) {
+                expect(result.rows).to.eql([{id: 1, name: "foo"}]);
+              }
+            }
+          },
         },
       },
 
