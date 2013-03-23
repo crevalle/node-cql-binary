@@ -67,7 +67,7 @@ vows.describe('cqlbinary').addBatch({
         'with table created': {
           topic: function (_, _, connection) {
             connection.execute(
-              "CREATE TABLE funny_table (id int PRIMARY KEY, name varchar)",
+              "CREATE TABLE funny_table (id int PRIMARY KEY, name varchar, permalink ascii)",
               CONSISTENCY.ONE,
               this.callback
             );
@@ -94,7 +94,7 @@ vows.describe('cqlbinary').addBatch({
           'with row added': {
             topic: function (_, _, _, connection) {
               connection.execute(
-                "INSERT INTO funny_table (id, name) VALUES (1, 'foo')",
+                "INSERT INTO funny_table (id, name, permalink) VALUES (1, 'foo', 'bar')",
                 CONSISTENCY.ONE,
                 this.callback
               );
@@ -122,7 +122,7 @@ vows.describe('cqlbinary').addBatch({
               },
 
               'it should return the row': function (error, result) {
-                expect(result.rows).to.eql([{id: 1, name: "foo"}]);
+                expect(result.rows).to.eql([{id: 1, name: "foo", permalink: "bar"}]);
               }
             }
           },
