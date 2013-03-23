@@ -4,6 +4,11 @@ var vows = require('vows'),
     CONSISTENCY = cqlbinary.CONSISTENCY,
     Result = cqlbinary.Result;
 
+var assertSuccess = function (error, result) {
+  expect(error).to.not.be.ok();
+  expect(result).to.be.ok();
+};
+
 vows.describe('cqlbinary').addBatch({
   'Connection': {
     topic: function () {
@@ -26,10 +31,7 @@ vows.describe('cqlbinary').addBatch({
         );
       },
 
-      'it should send response': function (error, response) {
-        expect(error).not.to.be.ok();
-        expect(response).to.be.ok();
-      },
+      'it should send response': assertSuccess,
 
       'it should yield result of type SCHEMA_CHANGE': function (error, result) {
         expect(result.type).to.be(Result.SCHEMA_CHANGE);
@@ -44,7 +46,51 @@ vows.describe('cqlbinary').addBatch({
       },
 
       'it should not set table': function (error, result) {
-        expect(result.table).not.to.be.ok();
+        expect(result.table).to.be(undefined);
+      },
+
+      'with keyspace selected': {
+        topic: function (_, connection) {
+          connection.execute("USE binarytest", CONSISTENCY.ONE, this.callback);
+        },
+
+       'it should complete successfully': assertSuccess,
+
+        'it should yield result of type SET_KEYSPACE': function (error, result) {
+          expect(result.type).to.be(Result.SET_KEYSPACE);
+        },
+
+        'it should put keyspace in result': function (error, result) {
+          expect(result.keyspace).to.be('binarytest');
+        },
+
+        'with table created': {
+          topic: function (_, _, connection) {
+            connection.execute(
+              "CREATE TABLE funny_table (id int PRIMARY KEY, name varchar)",
+              CONSISTENCY.ONE,
+              this.callback
+            );
+          },
+
+          'it should complete successfully': assertSuccess,
+
+          'it should return result of type schema change': function (error, result) {
+            expect(result.type).to.be(Result.SCHEMA_CHANGE);
+          },
+
+          'it should put change in result': function (error, result) {
+            expect(result.change).to.be('CREATED');
+          },
+
+          'it should put keyspace in result': function (error, result) {
+            expect(result.keyspace).to.be('binarytest');
+          },
+
+          'it should put table name in result': function (error, result) {
+            expect(result.table).to.be('funny_table');
+          }
+        },
       },
 
       'teardown': function () {
